@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block sidebar %}
+    <h5>Recent Bins</h5>
+    <ul>
+      <li><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+    </ul>
+{% endblock %}
+{% block head %}
+    <script type="text/javascript">
+      function createBin() {
+        $.ajax({'url': '/api/v1/bins', 'type': 'POST', 
+          'data': {'private': $('#private').prop("checked")},
+          'success': function(data) {
+            window.location.href = "/"+data['name']+"?inspect";
+          }
+        });
+      }
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- Main hero unit for a primary marketing message or call to action -->
+    <div class="hero-unit">
+      <h1>Inspect HTTP requests.</h1>
+      <p>RequestBin lets you create a URL that will collect requests made to it, then let you inspect them in a human-friendly way. Use RequestBin to see what your HTTP client is sending or to look at webhook requests.</p>
+      <p id="create">
+        <a class="btn primary large" onclick="createBin()">Create a RequestBin &raquo;</a><br />
+        <label><input id="private" type="checkbox" /> Make it a private bin</label>
+      </p>
+    </div>
+    
+    <!-- Example row of columns -->
+    <div class="row">
+      <div class="span6">
+        <h2>Run locally</h2>
+        <p>Although convenient as a service, you can also run RequestBin locally as a command-line tool. Python with pip or setuptools is all you need to get started.</p>
+        <p><a class="btn" href="/docs/Download">Learn more &raquo;</a></p>
+      </div>
+      <div class="span5">
+        <h2>JSONP API</h2>
+         <p>Use our REST API to create bins and retrieve collected request data. JSONP is supported so you can integrate RequestBin into your site.</p>
+        <p><a class="btn" href="/docs/API">Learn more &raquo;</a></p>
+     </div>
+      <div class="span5">
+        <h2>Donate</h2>
+        <p>Consider donating to help support RequestBin and prove that we can sustainably run these kinds of public services for the community.</p>
+        <p><a class="btn" href="/docs/Donate">Learn more &raquo;</a></p>
+      </div>
+    </div>
+{% endblock %}
