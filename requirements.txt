@@ -7,3 +7,6 @@ python-daemon==1.6
 setproctitle==1.1.2
 wsgiref==0.1.2
 feedparser==5.0.1
+Jinja2==2.4
+Werkzeug==0.6.1
+Flask==0.8
