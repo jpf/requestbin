@@ -1,1 +1,1 @@
-web: ./scripts/run.sh ./config/heroku.conf.py
+web: bin/python setup.py develop && python -c "__requires__ = 'gservice'; import sys; from pkg_resources import load_entry_point; sys.exit(load_entry_point('gservice', 'console_scripts', 'gservice')())" -C ./config/heroku.conf.py
