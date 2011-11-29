@@ -20,7 +20,7 @@ def bin(name):
                 host=request.host)
         else:
             bin.add(request)
-            return "OK\n"
+            return "ok\n"
     except KeyError:
         return "Not found", 404
 
