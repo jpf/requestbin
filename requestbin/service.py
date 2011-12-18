@@ -17,25 +17,30 @@ class Bin(object):
         self.color = random_color()
         self.name = tinyid(8)
         self.requests = []
-    
+
     def json(self):
         return json.dumps(dict(
             private=self.private, 
             color=self.color, 
             name=self.name,
             requests=self.requests))
-    
+
     def add(self, request):
         self.requests.insert(0, Request(self, request))
 
 class Request(object):
+    ignore_headers = Setting('ignore_headers', default=[])
+
     def __init__(self, bin, input):
         self.bin = bin
         self.id = tinyid(6)
         self.created = datetime.datetime.now()
-        self.remote_addr = input.remote_addr
+        self.remote_addr = input.headers.get('X-Forwarded-For',
+                input.remote_addr)
         self.method = input.method
         self.headers = dict(input.headers)
+        for header in self.ignore_headers
+            del self.headers[header]
         self.query_string = input.query_string
         self.form_data = []
         for k in input.values:
@@ -44,7 +49,7 @@ class Request(object):
         self.path = input.path
         self.content_length = input.content_length
         self.content_type = input.content_type
-    
+
     def __iter__(self):
         out = []
         if self.form_data:
@@ -77,30 +82,30 @@ class Request(object):
 class RequestBin(Service):
     bind_address = Setting('bind_address', default=('0.0.0.0', 5000))
     docs_url = Setting('docs_url', default='https://github.com/progrium/requestbin/wiki.atom')
-    
+
     def __init__(self):
         self.server = WSGIServer(self.bind_address, web.app)
         self.add_service(self.server)
-        
+
         web.app.config['service'] = self
-        
+
         self.bins = {}
         self.private_bins = {}
         self.docs = None
-    
+
     def do_start(self):
         self.docs = feedparser.parse(self.docs_url)
-    
+
     def create_bin(self, private=False):
         bin = Bin(private)
         self.bins[bin.name] = bin
         return self.bins[bin.name]
-    
+
     def lookup_bin(self, name):
         return self.bins[name]
-    
+
     def lookup_doc(self, name):
-        matches = [{'title': e.title, 'content': e.content[0].value} 
+        matches = [{'title': e.title, 'content': e.content[0].value}
                     for e in self.docs.entries if e.links[0].href.split('/')[-1] == name]
         if matches:
             return matches[0]

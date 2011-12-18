@@ -71,18 +71,18 @@
 {% block content %}
     {% for request in bin.requests %}
     <div class="request" id="{{request.id}}">
-      
+
       <div class="meta">
         <h2><a href="#{{request.id}}">#{{request.id}}</a></h2>
         <p>{{request.created}}<br />{{request.remote_addr}}</p>
       </div>
-      
+
       <h2 class="command">{{request.method}} {{request.path}}</h2>
       <ul class="pills">
         <li><a href="javascript:void(0)" onclick="toggleView('{{request.id}}')">Headers</a></li>
         <li class="active"><a href="javascript:void(0)" onclick="toggleView('{{request.id}}')">Content</a></li>
       </ul>
-      
+
       <div class="view">
         <div class="content-view note contentinfo">
           {% if request.content_type %}{{request.content_type}}<br />{% endif %}
@@ -102,7 +102,7 @@
       <hr />
     </div>
     {% endfor %}
-    
+
     <div class="alert-message block-message info">
       <p>This bin will keep the last 50 requests made to it and remain available for the next 48 hours.</p>
     </div>
