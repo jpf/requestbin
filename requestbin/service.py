@@ -39,7 +39,7 @@ class Request(object):
                 input.remote_addr)
         self.method = input.method
         self.headers = dict(input.headers)
-        for header in self.ignore_headers
+        for header in self.ignore_headers:
             del self.headers[header]
         self.query_string = input.query_string
         self.form_data = []
