@@ -9,6 +9,12 @@ def bins():
     bin = app.config['service'].create_bin(private)
     if bin.private:
         session[bin.name] = bin.secret_key
-    resp = make_response(bin.json(), 200)
-    resp.headers['Content-Type'] = 'application/json'
+    jsonp = request.args.get('jsonp')
+    if jsonp:
+        resp = make_response('%s(%s)' % (jsonp, bin.json()), 200)
+        resp.headers['Content-Type'] = 'text/javascript'
+    else:
+        resp = make_response(bin.json(), 200)
+        resp.headers['Content-Type'] = 'application/json'
+        resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
