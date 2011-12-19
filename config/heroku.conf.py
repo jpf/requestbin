@@ -8,6 +8,7 @@ X-Heroku-Dynos-In-Use
 X-Request-Start
 X-Heroku-Queue-Wait-Time
 X-Heroku-Queue-Depth
+X-Real-Ip
 """.split("\n")[1:-1]
 
 def service():

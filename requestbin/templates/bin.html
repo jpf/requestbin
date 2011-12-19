@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}RequestBin - {{bin.name}}{% endblock %}
-{% block icon %}<link rel="shortcut icon" href="{{favicon_uri}}" />{% endblock %}
+{% block icon %}<link rel="shortcut icon" href="{{bin.favicon_uri}}" />{% endblock %}
 {% block sidebar %}{% endblock %}
 {% block binurl %}
     <form class="pull-left binurl">
@@ -14,7 +14,7 @@
         padding-left: 26px; 
         background-color: white; 
         color: black; 
-        background-image: url({{favicon_uri}}); 
+        background-image: url({{bin.favicon_uri}}); 
         background-repeat: no-repeat; 
         background-position: 6px 5px;
       }
@@ -104,6 +104,6 @@
     {% endfor %}
 
     <div class="alert-message block-message info">
-      <p>This bin will keep the last 50 requests made to it and remain available for the next 48 hours.</p>
+      <p>This {% if bin.private %}<strong>private</strong>{% endif %} bin will keep the last 50 requests made to it and remain available for the next 48 hours.</p>
     </div>
 {% endblock %}

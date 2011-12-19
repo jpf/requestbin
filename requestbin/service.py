@@ -1,87 +1,20 @@
-import json
-import datetime
 import feedparser
+import time
 
+import gevent
 from gevent.pywsgi import WSGIServer
 
 from gservice.core import Service
 from gservice.config import Setting
 
 from . import web
-from .util import random_color
-from .util import tinyid
-
-class Bin(object):
-    def __init__(self, private=False):
-        self.private = private
-        self.color = random_color()
-        self.name = tinyid(8)
-        self.requests = []
-
-    def json(self):
-        return json.dumps(dict(
-            private=self.private, 
-            color=self.color, 
-            name=self.name,
-            requests=self.requests))
-
-    def add(self, request):
-        self.requests.insert(0, Request(self, request))
-
-class Request(object):
-    ignore_headers = Setting('ignore_headers', default=[])
-
-    def __init__(self, bin, input):
-        self.bin = bin
-        self.id = tinyid(6)
-        self.created = datetime.datetime.now()
-        self.remote_addr = input.headers.get('X-Forwarded-For',
-                input.remote_addr)
-        self.method = input.method
-        self.headers = dict(input.headers)
-        for header in self.ignore_headers:
-            del self.headers[header]
-        self.query_string = input.query_string
-        self.form_data = []
-        for k in input.values:
-            self.form_data.append([k, input.values[k]])
-        self.body = input.data
-        self.path = input.path
-        self.content_length = input.content_length
-        self.content_type = input.content_type
-
-    def __iter__(self):
-        out = []
-        if self.form_data:
-            if hasattr(self.form_data, 'items'):
-                items = self.form_data.items()
-            else:
-                items = self.form_data
-            for k,v in items:
-                try:
-                    outval = json.dumps(json.loads(v), sort_keys=True, indent=2)
-                except (ValueError, TypeError):
-                    outval = v
-                out.append((k, outval))
-        else:
-            try:
-                out = (('body', json.dumps(json.loads(self.body), sort_keys=True, indent=2)),)
-            except (ValueError, TypeError):
-                out = (('body', self.body),)
-
-        # Sort by field/file then by field name
-        files = list()
-        fields = list()
-        for (k,v) in out:
-            if type(v) is dict:
-                files.append((k,v))
-            else:
-                fields.append((k,v))
-        return iter(sorted(fields) + sorted(files))
+from .models import Bin
 
 class RequestBin(Service):
     bind_address = Setting('bind_address', default=('0.0.0.0', 5000))
     docs_url = Setting('docs_url', default='https://github.com/progrium/requestbin/wiki.atom')
+    bin_ttl = Setting('bin_ttl', default=48*3600)
+    cleanup_interval = Setting('cleanup_interval', default=3600)
 
     def __init__(self):
         self.server = WSGIServer(self.bind_address, web.app)
@@ -90,11 +23,22 @@ class RequestBin(Service):
         web.app.config['service'] = self
 
         self.bins = {}
-        self.private_bins = {}
         self.docs = None
 
     def do_start(self):
         self.docs = feedparser.parse(self.docs_url)
+        self.spawn(self._cleanup_loop)
+
+    def _cleanup_loop(self):
+        while True:
+            gevent.sleep(self.cleanup_interval)
+            self.expire_bins()
+
+    def expire_bins(self):
+        expiry = time.time() - self.bin_ttl
+        for name, bin in self.bins.items():
+            if bin.created < expiry:
+                self.bins.pop(name)
 
     def create_bin(self, private=False):
         bin = Bin(private)

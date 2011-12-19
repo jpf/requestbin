@@ -2,6 +2,7 @@ from flask import Flask, redirect
 
 app = Flask(__name__)
 app.debug = True
+app.secret_key = '((Z O*T^@YX R~XHH!jesrgwerg]LWerg@#R#$TT'
 
 app.add_url_rule('/', 'views.home')
 app.add_url_rule('/<name>', 'views.bin', methods=['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS', 'HEAD'])
