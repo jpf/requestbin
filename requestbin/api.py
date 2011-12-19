@@ -18,3 +18,11 @@ def bins():
         resp.headers['Content-Type'] = 'application/json'
         resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
+
+@app.endpoint('api.stats')
+def stats():
+    service = app.config['service']
+    stats = {'bin_count': len(service.bins)}
+    resp = make_response(json.dumps(stats), 200)
+    resp.headers['Content-Type'] = 'application/json'
+    return resp
