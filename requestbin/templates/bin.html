@@ -106,6 +106,7 @@
     {% endfor %}
 
     <div class="alert-message block-message info">
-      <p>This {% if bin.private %}<strong>private</strong>{% endif %} bin will keep the last 50 requests made to it and remain available for the next 48 hours.</p>
+      <p>This {% if bin.private %}<strong>private</strong>{% endif %} bin will keep the last 50 requests made to it and remain available for the next 48 hours. 
+      However, during beta the data store might be cleared at any time, so <strong>treat bins as highly ephemeral</strong>.</p>
     </div>
 {% endblock %}
